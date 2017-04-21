@@ -1,11 +1,10 @@
 HDTB*/*
 UDTB*/*
-CreateFeatures/
+Old_Code/
 EVALB/
 examples_1/
 Failed_Python/
 Papers/
-DependencyParsing/
 HindiDependencyParser/data/
 HindiDependencyParser/out/
 .idea/
