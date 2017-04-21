@@ -1,0 +1,17 @@
+HDTB*/*
+UDTB*/*
+CreateFeatures/
+EVALB/
+examples_1/
+Failed_Python/
+Papers/
+DependencyParsing/
+HindiDependencyParser/data/
+HindiDependencyParser/out/
+.idea/
+.DS_Store
+malt*/
+
+HindiDependencyParser/HindiDependencyParser.iml
+
+HindiDependencyParser/model
