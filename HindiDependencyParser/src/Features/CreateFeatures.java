@@ -88,11 +88,11 @@ public class CreateFeatures {
         //System.out.println(reverse_map);
     }
 
-    public String createFeatures(ArrayList<String> temp){
+    public String createFeatures(ArrayList<String> temp, String step){
         HashSet<Integer> s = new HashSet<>();
         StringBuffer sb = new StringBuffer();
         for (int j = 0; j < temp.size(); j++) {
-            if (j == 0) {
+            if (j == 0 && step == "train") {
                 String val = temp.get(j);
                 System.out.println(val);
                 System.out.println(labels_map.get(val));
@@ -149,7 +149,7 @@ public class CreateFeatures {
             for(int i = 0;i<filecontent.size();i++) {
                 ArrayList<String> temp = filecontent.get(i);
                 if (temp.size() != 0) {
-                    bufferedWriter.write(createFeatures(temp));
+                    bufferedWriter.write(createFeatures(temp,type));
                 }
             }
 
@@ -233,7 +233,7 @@ public class CreateFeatures {
 
     public String predict(String line){
 
-        String features = createFeatures(new ArrayList<String>(Arrays.asList(line.trim().split(" "))));
+        String features = createFeatures(new ArrayList<String>(Arrays.asList(line.trim().split(" "))),"test");
 
         ArrayList<String> feats= new ArrayList<String>(Arrays.asList(features.trim().split(" ")));
 

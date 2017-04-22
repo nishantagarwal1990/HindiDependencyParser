@@ -14,3 +14,7 @@ malt*/
 HindiDependencyParser/HindiDependencyParser.iml
 
 HindiDependencyParser/model
+
+HindiDependencyParser/feature_train.txt
+
+HindiDependencyParser/train.txt
