@@ -1,12 +1,32 @@
 package Features;
 
-import de.bwaldvogel.liblinear.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
-import java.util.*;
-import java.io.*;
+import de.bwaldvogel.liblinear.Feature;
+import de.bwaldvogel.liblinear.FeatureNode;
+import de.bwaldvogel.liblinear.InvalidInputDataException;
+import de.bwaldvogel.liblinear.Linear;
+import de.bwaldvogel.liblinear.Model;
+import de.bwaldvogel.liblinear.Parameter;
+import de.bwaldvogel.liblinear.Problem;
+import de.bwaldvogel.liblinear.SolverType;
+
 
 public class CreateFeatures {
-    public Map<String,Integer> labels_map;
+    public Map<String,Integer> labels_map = new HashMap<String,Integer>();
     public Map<String,Integer> feature_map;
     public Map<Integer,String> reverse_map;
 
@@ -74,6 +94,8 @@ public class CreateFeatures {
         for (int j = 0; j < temp.size(); j++) {
             if (j == 0) {
                 String val = temp.get(j);
+                System.out.println(val);
+                System.out.println(labels_map.get(val));
                 if(val.indexOf('+') == -1)
                     sb.append(Integer.toString(labels_map.get(val)) + " ");
                 else{
@@ -173,18 +195,12 @@ public class CreateFeatures {
             fileReader.close();
         }
         catch(FileNotFoundException ex) {
-            System.out.println(
-                    "Unable to open file '" +
-                            filename + "'");
+            System.out.println("Unable to open file '" +filename + "'");
         }
         catch(IOException ex) {
-            System.out.println(
-                    "Error reading file '"
-                            + filename + "'");
-
+            System.out.println("Error reading file '"+ filename + "'");
         }
     }
-
 
     public void Train(File trainfile){
         try {
@@ -237,25 +253,18 @@ public class CreateFeatures {
         return reverse_map.get((int)prediction);
     }
 
-    public void run(String trainfile,String testfile,String trainoutfile,String testoutfile) {
-
+    public void run(String trainfile,String trainoutfile) {
         String trainfilename = trainfile;
-        String testfilename = testfile;
+//        String testfilename = testfile;
         String trainoutfilename = trainoutfile;
-        String testoutfilename = testoutfile;
-
-
+//        String testoutfilename = testoutfile;
         readFileContent(trainfilename);
-
         //System.out.println("Training instances: "+trainfilecontent.size());
-
         //m.testfilecontent = m.readFileContent(testfilename);
         //System.out.println("Test instances: "+m.testfilecontent.size());
-
         createFeatureMap();
 
         writeFeatures(trainoutfilename,"train");
-
         //m.writeFeatures(testoutfilename,"test");
     }
 
