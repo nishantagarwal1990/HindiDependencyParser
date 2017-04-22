@@ -83,7 +83,7 @@ public class OracleTransition {
 	 * @throws MaltChainedException
 	 * @throws IOException 
 	 */
-	public void run(String inFile, String charSet,String step, String outDir) throws MaltChainedException, IOException {
+	public void run(String inFile, String charSet,String step, String outFile) throws MaltChainedException, IOException {
 
 		// Opens the input and output file with a character encoding set
 		tabReader.open(inFile, charSet);
@@ -91,21 +91,22 @@ public class OracleTransition {
 		FileWriter fw = null;
 		BufferedWriter bw = null;
 		if(step.equalsIgnoreCase("test")) {
-			fw = new FileWriter(outDir+"/"+inFile);
+			fw = new FileWriter(outFile);
 			bw = new BufferedWriter(fw);
 		}
 		// Reads Sentences until moreInput is false
 		while (moreInput) {
 			moreInput = tabReader.readSentence(inputGraph);
 			if (inputGraph.hasTokens()) {
-				if(step.equalsIgnoreCase("test")) 
+				if(step.equalsIgnoreCase("test")) {
 					createConfiguration(inputGraph,step, bw);
-				else
+					try {
+						bw.write("\n");
+					} catch(IOException e) {
+						System.out.println("Error: " + e.getMessage());
+					}
+				}else {
 					createConfiguration(inputGraph,step, null);
-				try {
-					bw.write("\n");
-				} catch(IOException e) {
-					System.out.println("Error: " + e.getMessage());
 				}
 			}
 		}
@@ -234,12 +235,23 @@ public class OracleTransition {
 		//		GuideUserAction action = new ComplexDecisionAction(history);
 
 		String features,label;
-		while(config.getInput().size() > 0 && config.getStack().size() > 1) {
+//		System.out.println("111");
+		while(config.getInput().size() > 0) {
 			Token t = null;
+			System.out.println("222");
 			if(config.getInput().size() != 0) {
+				System.out.println("333");
+				
 				features = createFeatures(inputGraph, null, config.getStack(), config.getInput());
+				System.out.println("features: "+ features);
+				System.out.println("stack:"+config.getStack().size());
+				System.out.println("stack top:"+ config.getStack().peek());
+				System.out.println("buffer:"+config.getInput().size());
+				System.out.println("buffer top:"+config.getInput().peek());
+				
 				label = this.createFeatures.predict(features);
-				System.out.println(label);
+				System.out.println("label:"+label);
+				
 				Stack<DependencyNode> st = config.getStack();
 				DependencyNode s1 = null;
 				DependencyNode s2 = null;
