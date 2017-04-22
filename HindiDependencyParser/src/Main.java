@@ -36,7 +36,7 @@ public class Main {
                 inFile = listofFiles[i].getName();
                 try {
                 	System.out.println(inDir+"/"+inFile);
-                    oracle.run(inDir+"/"+inFile, charSet, step, outDir);
+                    oracle.run(inDir+"/"+inFile, charSet, step, outDir+"/"+inFile);
 //                	oracle.run(inFile, charSet,step);
                 } catch (MaltChainedException e) {
                     System.err.println("MaltParser exception : " + e.getMessage());
