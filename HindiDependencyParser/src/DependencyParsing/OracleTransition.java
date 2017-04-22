@@ -211,11 +211,11 @@ public class OracleTransition {
         //Predict and apply transitions to get configuration in each step of transition based parsing
         GuideUserAction action = asc.predict(inputGraph, config);
 
-        String features;
+        String features,label;
         while(config.getInput().size()> 0) {
             if(config.getInput().size() != 0) {
                 features = createFeatures(inputGraph, as.getActionString(action), config.getStack(), config.getInput());
-//                String label = createFeatures.predict(features);
+                label = this.createFeatures.predict(features);
             }
 
             as.apply(action, config);

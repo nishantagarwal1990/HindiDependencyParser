@@ -51,7 +51,7 @@ public class Main {
         Main m = new Main();
 
         m.run(fileformat,outTrainfilename,inTrainDir,"train");
-        m.run(fileformat,outTestfilename,inTestDir,"test");
+
 
         String binaryOutTrainFile = "out/train.txt";
         String binaryOutTestFile = "out/test.txt";
@@ -61,6 +61,8 @@ public class Main {
         File trainfile = new File(binaryOutTrainFile);
 
         m.createFeatures.Train(trainfile);
+
+        m.run(fileformat,outTestfilename,inTestDir,"test");
 
     }
 }

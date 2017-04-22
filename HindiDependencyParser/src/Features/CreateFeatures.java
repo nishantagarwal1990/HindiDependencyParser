@@ -18,7 +18,6 @@ public class CreateFeatures {
     private File modelFile;
 
     public CreateFeatures(){
-        //System.out.println("Constructor");
         labels_map = new HashMap<String,Integer>();
         feature_map = new HashMap<String,Integer>();
         reverse_map = new HashMap<>();
@@ -45,7 +44,7 @@ public class CreateFeatures {
                             String v = val.substring(0,val.indexOf('+'));
                             if(!labels_map.containsKey(v)) {
                                 labels_map.put(v, k++);
-                                reverse_map.put(labels_map.get(val),val);
+                                reverse_map.put(labels_map.get(v),v);
                             }
                         }
                     }
@@ -58,12 +57,15 @@ public class CreateFeatures {
             }
         }
         feature_map.put("UNDEFINED",j);
+
+
         //feature_map.put("PHI",j+1);
         //feature_map.put("OMEGA",j+2);
 
-        System.out.println("No. of Features: "+feature_map.size());
-        System.out.println("No. of Labels: "+labels_map.size());
-        System.out.println(labels_map);
+        //System.out.println("No. of Features: "+feature_map.size());
+        //System.out.println("No. of Labels: "+labels_map.size());
+        //System.out.println(labels_map);
+        //System.out.println(reverse_map);
     }
 
     public String createFeatures(ArrayList<String> temp){
@@ -88,12 +90,14 @@ public class CreateFeatures {
                     }
                 }
             }
-//            if (i == 0 || filecontent.get(i - 1).size() == 0){
-//                s.add(feature_map.get("PHI"));
-//            }
-//            if(i == filecontent.size()-1 || filecontent.get(i + 1).size() == 0 ){
-//                s.add(feature_map.get("OMEGA"));
-//            }
+            /*
+            if (i == 0 || filecontent.get(i - 1).size() == 0){
+                s.add(feature_map.get("PHI"));
+            }
+            if(i == filecontent.size()-1 || filecontent.get(i + 1).size() == 0 ){
+                s.add(feature_map.get("OMEGA"));
+            }
+            */
         }
         List<Integer> sortedList = new ArrayList<Integer>(s);
         Collections.sort(sortedList);
@@ -147,9 +151,9 @@ public class CreateFeatures {
     }
 
 
-    public ArrayList<ArrayList<String>> readFileContent(String filename){
+    public void readFileContent(String filename){
         String line;
-        ArrayList<ArrayList<String>> temp = new ArrayList<>();
+
         try {
             // FileReader reads text files in the default encoding.
             FileReader fileReader =
@@ -161,7 +165,7 @@ public class CreateFeatures {
 
             while((line = bufferedReader.readLine()) != null) {
                 if(!line.isEmpty())
-                    temp.add(new ArrayList<String>(Arrays.asList(line.trim().split(" "))));
+                    trainfilecontent.add(new ArrayList<String>(Arrays.asList(line.trim().split(" "))));
             }
 
             // Always close files.
@@ -177,30 +181,10 @@ public class CreateFeatures {
             System.out.println(
                     "Error reading file '"
                             + filename + "'");
-            // Or we could just do this:
-            // ex.printStackTrace();
+
         }
-        return temp;
     }
 
-    public void run(String trainfile,String testfile,String trainoutfile,String testoutfile) {
-
-        String trainfilename = trainfile;
-        String testfilename = testfile;
-        String trainoutfilename = trainoutfile;
-        String testoutfilename = testoutfile;
-
-        CreateFeatures m = new CreateFeatures();
-
-        m.trainfilecontent = m.readFileContent(trainfilename);
-        System.out.println("Training instances: "+m.trainfilecontent.size());
-        m.testfilecontent = m.readFileContent(testfilename);
-        System.out.println("Test instances: "+m.testfilecontent.size());
-        m.createFeatureMap();
-
-        m.writeFeatures(trainoutfilename,"train");
-        m.writeFeatures(testoutfilename,"test");
-    }
 
     public void Train(File trainfile){
         try {
@@ -232,7 +216,6 @@ public class CreateFeatures {
     }
 
     public String predict(String line){
-//        model = Model.load(modelFile);
 
         String features = createFeatures(new ArrayList<String>(Arrays.asList(line.trim().split(" "))));
 
@@ -248,10 +231,32 @@ public class CreateFeatures {
             instance[i-1] = new FeatureNode(a,b);
         }
 
-//        Feature[] instance = { new FeatureNode(1, 4), new FeatureNode(2, 2) };
         double prediction = Linear.predict(model, instance);
 
-        return reverse_map.get(prediction);
+
+        return reverse_map.get((int)prediction);
+    }
+
+    public void run(String trainfile,String testfile,String trainoutfile,String testoutfile) {
+
+        String trainfilename = trainfile;
+        String testfilename = testfile;
+        String trainoutfilename = trainoutfile;
+        String testoutfilename = testoutfile;
+
+
+        readFileContent(trainfilename);
+
+        //System.out.println("Training instances: "+trainfilecontent.size());
+
+        //m.testfilecontent = m.readFileContent(testfilename);
+        //System.out.println("Test instances: "+m.testfilecontent.size());
+
+        createFeatureMap();
+
+        writeFeatures(trainoutfilename,"train");
+
+        //m.writeFeatures(testoutfilename,"test");
     }
 
 }
