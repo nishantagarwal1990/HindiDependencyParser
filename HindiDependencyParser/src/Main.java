@@ -3,16 +3,17 @@ import Features.CreateFeatures;
 import org.maltparser.core.exception.MaltChainedException;
 
 import java.io.File;
+import java.io.IOException;
 
 public class Main {
     //public OracleTransition oracleTransition;
     private CreateFeatures createFeatures;
 
-    Main(){
+    public Main(){
         createFeatures = new CreateFeatures();
     }
 
-    public void run(String fileformat,String outfilename,String inDir,String step){
+    public void run(String fileformat,String outfilename,String inDir,String step, String outDir) throws IOException{
 
         File f = new File(inDir);
         File[] listofFiles = f.listFiles();
@@ -22,7 +23,10 @@ public class Main {
 
         OracleTransition oracle = null;
         try {
-            oracle = new OracleTransition(fileformat,outfilename,createFeatures);
+        	if(step.equalsIgnoreCase("train"))
+        		oracle = new OracleTransition(fileformat,outfilename,createFeatures);
+        	else
+        		oracle = new OracleTransition(fileformat,"",createFeatures);
         } catch (MaltChainedException e) {
             System.err.println("MaltParser exception : " + e.getMessage());
         }
@@ -31,7 +35,9 @@ public class Main {
             if (listofFiles[i].isFile() && !listofFiles[i].getName().startsWith(".")) {
                 inFile = listofFiles[i].getName();
                 try {
-                    oracle.run(inDir+"/"+inFile, charSet,step);
+                	System.out.println(inDir+"/"+inFile);
+                    oracle.run(inDir+"/"+inFile, charSet, step, outDir);
+//                	oracle.run(inFile, charSet,step);
                 } catch (MaltChainedException e) {
                     System.err.println("MaltParser exception : " + e.getMessage());
                 }
@@ -43,26 +49,36 @@ public class Main {
     public static void main(String[] args) {
         String fileformat = "resources/conllx.xml";
         String inTrainDir = "data/Training";
-        String outTrainfilename = "out/feature_train.txt";
-        String inTestDir = "data/Testing";
-        String outTestfilename = "out/feature_test.txt";
+//        String inTrainDir = "docs/train";
+        String outTrainfilename = "feature_train.txt";
+//        String inTestDir = "data/Testing";
+        String inTestDir = "docs/test";
+//        String outTestfilename = "feature_test.txt";
+//        String outDependencyFile = "dependency.txt";
 
 
         Main m = new Main();
 
-        m.run(fileformat,outTrainfilename,inTrainDir,"train");
+        try {
+			m.run(fileformat,outTrainfilename,inTrainDir,"train","");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-
-        String binaryOutTrainFile = "out/train.txt";
-        String binaryOutTestFile = "out/test.txt";
-
-        m.createFeatures.run(outTrainfilename,outTestfilename,binaryOutTrainFile,binaryOutTestFile);
-
+        String binaryOutTrainFile = "train.txt";
+//        String binaryOutTestFile = "test.txt";
+        
         File trainfile = new File(binaryOutTrainFile);
-
+        m.createFeatures.run(outTrainfilename,binaryOutTrainFile);
         m.createFeatures.Train(trainfile);
-
-        m.run(fileformat,outTestfilename,inTestDir,"test");
-
+        
+        String outDir = "out";
+        try {
+			m.run(fileformat,"",inTestDir,"test", outDir);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 }
