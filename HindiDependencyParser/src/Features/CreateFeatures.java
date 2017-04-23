@@ -94,8 +94,6 @@ public class CreateFeatures {
         for (int j = 0; j < temp.size(); j++) {
             if (j == 0 && step == "train") {
                 String val = temp.get(j);
-                System.out.println(val);
-                System.out.println(labels_map.get(val));
                 if(val.indexOf('+') == -1)
                     sb.append(Integer.toString(labels_map.get(val)) + " ");
                 else{
@@ -259,9 +257,7 @@ public class CreateFeatures {
         String trainoutfilename = trainoutfile;
 //        String testoutfilename = testoutfile;
         readFileContent(trainfilename);
-        //System.out.println("Training instances: "+trainfilecontent.size());
         //m.testfilecontent = m.readFileContent(testfilename);
-        //System.out.println("Test instances: "+m.testfilecontent.size());
         createFeatureMap();
 
         writeFeatures(trainoutfilename,"train");

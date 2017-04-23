@@ -34,6 +34,8 @@ import org.maltparser.parser.history.action.ComplexDecisionAction;
 import org.maltparser.parser.history.action.GuideUserAction;
 import org.maltparser.parser.history.container.ActionContainer;
 
+import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
+
 
 public class OracleTransition {
 	private DependencyGraph inputGraph;
@@ -88,32 +90,35 @@ public class OracleTransition {
 		// Opens the input and output file with a character encoding set
 		tabReader.open(inFile, charSet);
 		boolean moreInput = true;
-		FileWriter fw = null;
-		BufferedWriter bw = null;
+		FileWriter fw2 = null;
+		BufferedWriter bw2 = null;
 		if(step.equalsIgnoreCase("test")) {
-			fw = new FileWriter(outFile);
-			bw = new BufferedWriter(fw);
+			fw2 = new FileWriter(outFile);
+			bw2 = new BufferedWriter(fw2);
 		}
 		// Reads Sentences until moreInput is false
 		while (moreInput) {
 			moreInput = tabReader.readSentence(inputGraph);
 			if (inputGraph.hasTokens()) {
 				if(step.equalsIgnoreCase("test")) {
-					createConfiguration(inputGraph,step, bw);
+					createConfiguration(inputGraph,step, bw2);
 					try {
-						bw.write("\n");
+						bw2.write("\n");
 					} catch(IOException e) {
 						System.out.println("Error: " + e.getMessage());
 					}
+					//					System.out.println("sentence changed...........................");
 				}else {
 					createConfiguration(inputGraph,step, null);
 				}
 			}
+			//			moreInput = false;
 		}
+		//		System.out.println("number of sentences:"+tabReader.getSentenceCount() + " file:"+outFile );
 		if(step.equalsIgnoreCase("test")) {
-			bw.flush();
-			bw.close();
-			fw.close();
+			bw2.flush();
+			bw2.close();
+			fw2.close();
 		}
 		tabReader.close();
 	}
@@ -125,7 +130,7 @@ public class OracleTransition {
 	 * @param st
 	 * @param q
 	 */
-	public String createFeatures(DependencyGraph inputGraph, String transition, Stack<DependencyNode> st, Stack<DependencyNode> q){
+	public String createFeatures(DependencyGraph inputGraph, String transition, Stack<DependencyNode> st, Stack<DependencyNode> q, String step){
 		StringBuffer sb = new StringBuffer();
 		if(transition != null)
 			sb.append(transition+" ");
@@ -177,12 +182,13 @@ public class OracleTransition {
 					+" "+s2_tag+s1_tag+s1_lc_tag+" "+s2_tag+s1_tag+s1_rc_tag+" "+s2_tag+s1_tag+s2_lc_tag
 					+" "+s2_tag+s1_tag+s2_rc_tag+" "+s2_tag+s1_word+s2_rc_tag+" "+s2_tag+s1_word+s1_lc_tag
 					+" "+s2_tag+s1_word+b1_tag+"\n");
-			try {
-				bw.write(sb.toString());
-			} catch(IOException e){
-				System.out.println("Error: "+e.getMessage());
+			if(step.equalsIgnoreCase("train")) {
+				try {
+					bw.write(sb.toString());
+				} catch(IOException e){
+					System.out.println("Error: "+e.getMessage());
+				}
 			}
-
 		}catch(MaltChainedException e){
 			System.out.println("Error:"+e.getMessage());
 		}
@@ -196,7 +202,7 @@ public class OracleTransition {
 	 * @throws MaltChainedException
 	 * @throws IOException 
 	 */
-	public void createConfiguration(DependencyGraph inputGraph,String step, BufferedWriter bw) throws MaltChainedException, IOException {
+	public void createConfiguration(DependencyGraph inputGraph,String step, BufferedWriter bw2) throws MaltChainedException, IOException {
 		//Create configuration
 		NivreConfig config = new NivreConfig(false, false, false);
 
@@ -224,68 +230,74 @@ public class OracleTransition {
 		if(step == "train")
 			TrainConfiguration(config,inputGraph,asc,as);
 		else{
-			TestConfiguration(config,inputGraph,asc,as, bw);
+			TestConfiguration(config,inputGraph,asc,as, bw2);
 		}
 	}
 
-	public void TestConfiguration(NivreConfig config,DependencyGraph inputGraph,ArcStandardOracle asc,ArcStandard as, BufferedWriter bw) throws MaltChainedException, IOException{
+	public void TestConfiguration(NivreConfig config,DependencyGraph inputGraph,ArcStandardOracle asc,ArcStandard as, BufferedWriter bw2) throws MaltChainedException, IOException{
 		List<Token> tokenList = new LinkedList<>();
 
-		//Predict and apply transitions to get configuration in each step of transition based parsing
-		//		GuideUserAction action = new ComplexDecisionAction(history);
-
 		String features,label;
-//		System.out.println("111");
-		while(config.getInput().size() > 0) {
+		while(config.getInput().size() > 0 || config.getStack().size() > 1) {
 			Token t = null;
-			System.out.println("222");
-			if(config.getInput().size() != 0) {
-				System.out.println("333");
-				
-				features = createFeatures(inputGraph, null, config.getStack(), config.getInput());
-				System.out.println("features: "+ features);
-				System.out.println("stack:"+config.getStack().size());
-				System.out.println("stack top:"+ config.getStack().peek());
-				System.out.println("buffer:"+config.getInput().size());
-				System.out.println("buffer top:"+config.getInput().peek());
-				
-				label = this.createFeatures.predict(features);
-				System.out.println("label:"+label);
-				
-				Stack<DependencyNode> st = config.getStack();
-				DependencyNode s1 = null;
-				DependencyNode s2 = null;
-				if(config.getStack().size() > 1) {
-					s1 = st.pop();
-					if(config.getStack().size() > 1) {
-						s2 = st.peek();
-					}
-				}
-				if(label.equalsIgnoreCase("LA")) {
-					t = new Token(s2, s1.getIndex());
-				}else if(label.equalsIgnoreCase("RA")) {
-					t = new Token(s1, s2.getIndex());
-				}else {
-					st.push(config.getInput().pop());
-				}
-			}
+			features = createFeatures(inputGraph, null, config.getStack(), config.getInput(),"test");
 
-			//			as.apply(action, config);
-			//
-			//
-			//			if (config.getInput().size()> 0)
-			//				action = asc.predict(inputGraph, config);
-			if(t != null)
-				tokenList.add(t);
+			label = this.createFeatures.predict(features);
+//			System.out.println("label:"+label);
+			if(!(config.getInput().size() == 0 && label.equalsIgnoreCase("SH")))
+				tokenList = apply(config, label, tokenList);
+			else
+				break;
+
 		}
+		//				System.out.println("tokenlist:"+tokenList.size());
 		Collections.sort(tokenList, new Comparator<Token>() {
 			public int compare(Token left, Token right)  {
 				return left.node.getIndex() - right.node.getIndex();
 			}
 		});
+		//				System.out.println("tokenlist:"+tokenList.toString());
 		for(Token t: tokenList) {
-			bw.write(createCoNllConfiguration(t, inputGraph));
+			bw2.write(createCoNllConfiguration(t, inputGraph));
+			bw2.write("\n");
 		}
+	}
+
+	public List<Token> apply(NivreConfig config, String action, List<Token> tokenList) {
+		Token t = null;
+		Stack<DependencyNode> stack = config.getStack();
+		Stack<DependencyNode> input = config.getInput();
+		if(action.equalsIgnoreCase("LA")) {
+			DependencyNode s1 = null;
+			if(input.size()>0)
+				s1 = input.peek();
+			else
+				s1 = stack.pop();
+			DependencyNode s2 = stack.pop();
+			t = new Token(s2, s1.getIndex());
+			if(input.size() == 0)
+				stack.push(s1);
+		}else if(action.equalsIgnoreCase("RA")) {
+			DependencyNode s1 = null;
+			if(input.size()>0)
+				s1 = input.pop();
+			else
+				s1 = stack.pop();
+			DependencyNode s2 = null ;
+			if (!stack.peek().isRoot()) {
+				s2 = stack.peek();
+				input.push(stack.pop());        
+				t = new Token(s1, s2.getIndex());
+			}else {
+				t = new Token(s1, 0);
+			}
+		}else {
+			stack.push(input.pop()); 
+
+		}
+		if(t != null && t.node.getIndex() >0)
+			tokenList.add(t);
+		return tokenList;
 	}
 
 	public List<SymbolTable> returnSymbolTableList(DependencyGraph inputGraph ){
@@ -304,25 +316,26 @@ public class OracleTransition {
 		return symList;
 	}
 
-	public String createCoNllConfiguration(Token t,DependencyGraph inputGraph ) {
+	public String createCoNllConfiguration(Token t,DependencyGraph inputGraph ) throws MaltChainedException {
 		StringBuffer sb = new StringBuffer();
 		List<SymbolTable> symList = returnSymbolTableList(inputGraph);
+//		System.out.println("Symlist size:"+ symList.size());
+//		System.out.println("t:"+t.node.getIndex());
+//		System.out.println("node id:"+ t.node.getLabelSymbol(inputGraph.getSymbolTables().getSymbolTable("FORM")));
 		int i = 0;
 		try {
 			for(SymbolTable st: symList) {
 				sb.append(t.node.getLabelSymbol(symList.get(i)));
-				sb.append(" ");
+				sb.append("   ");
+				i++;
 			}
-			sb.append(String.valueOf(t.head) + " " + "_" + " " + "_" + " " + "_");
+			sb.append(String.valueOf(t.head) + "   " + "_" + "   " + "_" + "   " + "_");
 		}catch(MaltChainedException me) {
 			me.printStackTrace();
 		}
 		return sb.toString();
 	}
 
-	//	public void writeDependencyNode(BufferedWriter bw, String st) throws IOException {
-	//		bw.write(st);
-	//	}
 
 	public void TrainConfiguration(NivreConfig config,DependencyGraph inputGraph,ArcStandardOracle asc,ArcStandard as) throws MaltChainedException{
 
@@ -332,7 +345,7 @@ public class OracleTransition {
 
 		while(config.getInput().size()> 0) {
 			if(config.getInput().size() != 0)
-				createFeatures(inputGraph,as.getActionString(action),config.getStack(),config.getInput());
+				createFeatures(inputGraph,as.getActionString(action),config.getStack(),config.getInput(),"train");
 
 			as.apply(action, config);
 
