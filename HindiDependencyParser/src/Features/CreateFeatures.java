@@ -216,7 +216,7 @@ public class CreateFeatures {
         Parameter parameter = new Parameter(solver, C, eps);
         try {
             model = Linear.train(problem, parameter);
-            modelFile = new File("model");
+            modelFile = new File("out/model");
 
             try {
                 model.save(modelFile);
