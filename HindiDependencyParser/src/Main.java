@@ -50,8 +50,8 @@ public class Main {
         String inTrainDir = "data/Training";
 //        String inTrainDir = "docs/train";
         String outTrainfilename = "feature_train.txt";
-//        String inTestDir = "data/Testing";
-        String inTestDir = "docs/test";
+        String inTestDir = "data/Testing";
+//        String inTestDir = "docs/test";
 //        String outTestfilename = "feature_test.txt";
 //        String outDependencyFile = "dependency.txt";
 

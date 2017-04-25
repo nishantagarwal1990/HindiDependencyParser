@@ -246,7 +246,7 @@ public class CreateFeatures {
         }
 
         double prediction = Linear.predict(model, instance);
-
+//        return (int)prediction;
 
         return reverse_map.get((int)prediction);
     }
