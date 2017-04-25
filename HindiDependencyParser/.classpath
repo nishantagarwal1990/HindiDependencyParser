@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="resources/liblinear-java-1.95.jar"/>
-	<classpathentry kind="lib" path="resources/log4j.jar"/>
-	<classpathentry kind="lib" path="resources/maltparser-1.9.0.jar" sourcepath="/Users/shweta/Downloads/maltparser-1.9.0/maltparser-1.9.0.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="output" path="bin"/>
-</classpath>
