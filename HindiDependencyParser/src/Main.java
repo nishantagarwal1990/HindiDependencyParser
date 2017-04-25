@@ -35,7 +35,7 @@ public class Main {
             if (listofFiles[i].isFile() && !listofFiles[i].getName().startsWith(".")) {
                 inFile = listofFiles[i].getName();
                 try {
-                	System.out.println(inDir+"/"+inFile);
+//                	System.out.println(inDir+"/"+inFile);
                     oracle.run(inDir+"/"+inFile, charSet, step, outDir+"/"+inFile);
                 } catch (MaltChainedException e) {
                     System.err.println("MaltParser exception : " + e.getMessage());
@@ -48,25 +48,18 @@ public class Main {
     public static void main(String[] args) {
         String fileformat = "resources/conllx.xml";
         String inTrainDir = "data/Training";
-//        String inTrainDir = "docs/train";
         String outTrainfilename = "feature_train.txt";
         String inTestDir = "data/Testing";
-//        String inTestDir = "docs/test";
-//        String outTestfilename = "feature_test.txt";
-//        String outDependencyFile = "dependency.txt";
-
 
         Main m = new Main();
 
         try {
 			m.run(fileformat,outTrainfilename,inTrainDir,"train","");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
         String binaryOutTrainFile = "train.txt";
-//        String binaryOutTestFile = "test.txt";
         
         File trainfile = new File(binaryOutTrainFile);
         m.createFeatures.run(outTrainfilename,binaryOutTrainFile);

@@ -246,16 +246,13 @@ public class CreateFeatures {
         }
 
         double prediction = Linear.predict(model, instance);
-//        return (int)prediction;
 
         return reverse_map.get((int)prediction);
     }
 
     public void run(String trainfile,String trainoutfile) {
         String trainfilename = trainfile;
-//        String testfilename = testfile;
         String trainoutfilename = trainoutfile;
-//        String testoutfilename = testoutfile;
         readFileContent(trainfilename);
         //m.testfilecontent = m.readFileContent(testfilename);
         createFeatureMap();

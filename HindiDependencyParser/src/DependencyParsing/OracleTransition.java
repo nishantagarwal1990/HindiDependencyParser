@@ -79,6 +79,7 @@ public class OracleTransition {
 		// Creates a tabular reader with the CoNLL data format
 		tabReader = new TabReader();
 		tabReader.setDataFormatInstance(dataFormatInstance);
+		// Creates a tabular writer with the CoNLL data format
 		tabWriter = new TabWriter();
 		tabWriter.setDataFormatInstance(dataFormatInstance);
 
@@ -96,38 +97,21 @@ public class OracleTransition {
 		// Opens the input and output file with a character encoding set
 		tabReader.open(inFile, charSet);
 		boolean moreInput = true;
-		FileWriter fw2 = null;
-		BufferedWriter bw2 = null;
-
+		
 		if(step.equalsIgnoreCase("test")) {
 			tabWriter.open(outFile, charSet);
-			fw2 = new FileWriter(outFile);
-			bw2 = new BufferedWriter(fw2);
 		}
 		// Reads Sentences until moreInput is false
 		while (moreInput) {
 			moreInput = tabReader.readSentence(inputGraph);
 			if (inputGraph.hasTokens()) {
 				if(step.equalsIgnoreCase("test")) {
-					createConfiguration(inputGraph,step, bw2);
-//					try {
-												tabWriter.writeSentence(inputGraph);
-//						bw2.write("\n");
-//					} catch(IOException e) {
-//						System.out.println("Error: " + e.getMessage());
-//					}
-					System.out.println("sentence changed...........................");
+					createConfiguration(inputGraph,step);
+					tabWriter.writeSentence(inputGraph);
 				}else {
-					createConfiguration(inputGraph,step, null);
+					createConfiguration(inputGraph,step);
 				}
 			}
-			//			moreInput = false;
-		}
-		//		System.out.println("number of sentences:"+tabReader.getSentenceCount() + " file:"+outFile );
-		if(step.equalsIgnoreCase("test")) {
-			bw2.flush();
-			bw2.close();
-			fw2.close();
 		}
 		tabWriter.close();
 		tabReader.close();
@@ -212,7 +196,7 @@ public class OracleTransition {
 	 * @throws MaltChainedException
 	 * @throws IOException 
 	 */
-	public void createConfiguration(DependencyGraph inputGraph,String step, BufferedWriter bw2) throws MaltChainedException, IOException {
+	public void createConfiguration(DependencyGraph inputGraph,String step) throws MaltChainedException, IOException {
 		//Create configuration
 		NivreConfig config = new NivreConfig(false, false, false);
 
@@ -245,25 +229,20 @@ public class OracleTransition {
 			PredictAction pa = new PredictAction(pm);
 			pa.initTableHandlers(_decisionSettings, symbolTables);
 			pa.initTransitionSystem(history);
-			TestConfiguration(config,inputGraph,asc, history, pa, bw2);
+			TestConfiguration(config,inputGraph,asc, history, pa);
 
 		}
 	}
 
-	public void TestConfiguration(NivreConfig config,DependencyGraph inputGraph,ArcStandardOracle asc, History history, PredictAction pa, BufferedWriter bw2) throws MaltChainedException, IOException{
-		List<Token> tokenList = new LinkedList<>();
-
+	public void TestConfiguration(NivreConfig config,DependencyGraph inputGraph,ArcStandardOracle asc, History history, PredictAction pa) throws MaltChainedException, IOException{
+		
 		String features, label;
-//		int label;
 		int labelT;
 		while(config.getInput().size() > 0) {
-			Token t = null;
 			features = createFeatures(inputGraph, null, config.getStack(), config.getInput(),"test");
 
 			label = this.createFeatures.predict(features);
-			System.out.println("label:"+label);
-			//			GuideUserAction action = createGuidedAction(inputGraph, asc, as, history, config, label);
-
+	
 			if(label.equalsIgnoreCase("SH")) {
 				labelT = 1;
 			}else if(label.equalsIgnoreCase("RA")) {
@@ -272,143 +251,109 @@ public class OracleTransition {
 				labelT = 3;
 			}
 			GuideUserAction action = pa.setAction(inputGraph, history, config, labelT);
-			System.out.println("aciton :"+action.numberOfActions());
+//			System.out.println("aciton :"+action.numberOfActions());
 			pa.apply(action, config);
-//			pa.applyTransition(labelT, config);
-			//			if(!(config.getInput().size() == 0 && label.equalsIgnoreCase("SH"))) {
-			//				
-			//				tokenList = apply(config, label, tokenList, asc);
-			//			}
-			//			else
-			//				break;
-			//
 		}
-		//		//				System.out.println("tokenlist:"+tokenList.size());
-		//		Collections.sort(tokenList, new Comparator<Token>() {
-		//			public int compare(Token left, Token right)  {
-		//				return left.node.getIndex() - right.node.getIndex();
-		//			}
-		//		});
-		//		//				System.out.println("tokenlist:"+tokenList.toString());
-		//		for(Token t: tokenList) {
-		//			bw2.write(createCoNllConfiguration(t, inputGraph));
-		//			bw2.write("\n");
-		//		}
 	}
 
-	public GuideUserAction createGuidedAction(DependencyGraph inputGraph, ArcStandardOracle asc, ArcStandard as, History history, NivreConfig config, String label) throws MaltChainedException {
-		GuideUserAction action = history.getEmptyGuideUserAction();
-
-		ActionContainer[] actionContainers;
-		actionContainers = history.getActionContainerArray();
-		System.out.println("container length:"+ actionContainers.length);
-
-		ActionContainer actionContainer = null;
-
-		if(label.equalsIgnoreCase("SH")) {
-			actionContainer = actionContainers[0];
-
-			actionContainer.setAction(1);
-			actionContainers[0] = actionContainer;
-			action.addAction(actionContainers);
-
-			//			return as.updateActionContainers(1, null);
-		}else if(label.equalsIgnoreCase("LA")) {
-			actionContainer = actionContainers[1];
-			actionContainer.setAction(2);
-			actionContainers[1] = actionContainer;
-			action.addAction(actionContainers);	
-			//			return updateActionContainers(2, inputGraph.getTokenNode(stackTopIndex).getHeadEdge().getLabelSet());
-		}else if(label.equalsIgnoreCase("RA")) {
-			actionContainer = actionContainers[2];
-			actionContainer.setAction(3);
-			actionContainers[2] = actionContainer;
-			action.addAction(actionContainers);
-			//			return updateActionContainers(3, inputGraph.getTokenNode(inputTopIndex).getHeadEdge().getLabelSet());
-		}
-		return action;
-	}
-	public List<Token> apply(NivreConfig config, String action, List<Token> tokenList, ArcStandardOracle asc) {
-		Token t = null;
-		Stack<DependencyNode> stack = config.getStack();
-		Stack<DependencyNode> input = config.getInput();
-		//		
-		//		int stackTopIndex = stack.peek().getIndex();
-		//		int inputTopIndex = input.peek().getIndex();
-		//		
-		//		if(action.equalsIgnoreCase("SH")) {
-		//			
-		//		}
-
-		if(action.equalsIgnoreCase("LA")) {
-			DependencyNode s1 = null;
-			if(input.size()>0)
-				s1 = input.peek();
-			else
-				s1 = stack.pop();
-			DependencyNode s2 = stack.pop();
-			t = new Token(s2, s1.getIndex());
-			if(input.size() == 0)
-				stack.push(s1);
-		}else if(action.equalsIgnoreCase("RA")) {
-			DependencyNode s1 = null;
-			if(input.size()>0)
-				s1 = input.pop();
-			else
-				s1 = stack.pop();
-			DependencyNode s2 = null ;
-			if (!stack.peek().isRoot()) {
-				s2 = stack.peek();
-				input.push(stack.pop());        
-				t = new Token(s1, s2.getIndex());
-			}else {
-				t = new Token(s1, 0);
-			}
-		}else {
-			stack.push(input.pop()); 
-
-		}
-		if(t != null && t.node.getIndex() >0)
-			tokenList.add(t);
-		return tokenList;
-	}
-
-	public List<SymbolTable> returnSymbolTableList(DependencyGraph inputGraph ){
-		List<SymbolTable> symList = new LinkedList<>();
-		try {
-			symList.add(inputGraph.getSymbolTables().getSymbolTable("ID"));
-			symList.add(inputGraph.getSymbolTables().getSymbolTable("FORM"));
-			symList.add(inputGraph.getSymbolTables().getSymbolTable("LEMMA"));
-			symList.add(inputGraph.getSymbolTables().getSymbolTable("CPOSTAG"));
-			symList.add(inputGraph.getSymbolTables().getSymbolTable("POSTAG"));
-			symList.add(inputGraph.getSymbolTables().getSymbolTable("FEATS"));
-			//    	symList.add(inputGraph.getSymbolTables().getSymbolTable("HEAD"));
-		}catch(MaltChainedException me) {
-			me.printStackTrace();
-		}
-		return symList;
-	}
-
-	public String createCoNllConfiguration(Token t,DependencyGraph inputGraph ) throws MaltChainedException {
-		StringBuffer sb = new StringBuffer();
-		List<SymbolTable> symList = returnSymbolTableList(inputGraph);
-		//		System.out.println("Symlist size:"+ symList.size());
-		//		System.out.println("t:"+t.node.getIndex());
-		//		System.out.println("node id:"+ t.node.getLabelSymbol(inputGraph.getSymbolTables().getSymbolTable("FORM")));
-		int i = 0;
-		try {
-			for(SymbolTable st: symList) {
-				sb.append(t.node.getLabelSymbol(symList.get(i)));
-				sb.append("\t");
-				i++;
-			}
-			sb.append(String.valueOf(t.head) + "\t" + "_" + "\t" + "_" + "\t" + "_");
-		}catch(MaltChainedException me) {
-			me.printStackTrace();
-		}
-		return sb.toString();
-	}
-
+//	public GuideUserAction createGuidedAction(DependencyGraph inputGraph, ArcStandardOracle asc, ArcStandard as, History history, NivreConfig config, String label) throws MaltChainedException {
+//		GuideUserAction action = history.getEmptyGuideUserAction();
+//
+//		ActionContainer[] actionContainers;
+//		actionContainers = history.getActionContainerArray();
+//		System.out.println("container length:"+ actionContainers.length);
+//
+//		ActionContainer actionContainer = null;
+//
+//		if(label.equalsIgnoreCase("SH")) {
+//			actionContainer = actionContainers[0];
+//
+//			actionContainer.setAction(1);
+//			actionContainers[0] = actionContainer;
+//			action.addAction(actionContainers);
+//		}else if(label.equalsIgnoreCase("LA")) {
+//			actionContainer = actionContainers[1];
+//			actionContainer.setAction(2);
+//			actionContainers[1] = actionContainer;
+//			action.addAction(actionContainers);	
+//		}else if(label.equalsIgnoreCase("RA")) {
+//			actionContainer = actionContainers[2];
+//			actionContainer.setAction(3);
+//			actionContainers[2] = actionContainer;
+//			action.addAction(actionContainers);
+//		}
+//		return action;
+//	}
+//	
+//	public List<Token> apply(NivreConfig config, String action, List<Token> tokenList, ArcStandardOracle asc) {
+//		Token t = null;
+//		Stack<DependencyNode> stack = config.getStack();
+//		Stack<DependencyNode> input = config.getInput();
+//			if(action.equalsIgnoreCase("LA")) {
+//			DependencyNode s1 = null;
+//			if(input.size()>0)
+//				s1 = input.peek();
+//			else
+//				s1 = stack.pop();
+//			DependencyNode s2 = stack.pop();
+//			t = new Token(s2, s1.getIndex());
+//			if(input.size() == 0)
+//				stack.push(s1);
+//		}else if(action.equalsIgnoreCase("RA")) {
+//			DependencyNode s1 = null;
+//			if(input.size()>0)
+//				s1 = input.pop();
+//			else
+//				s1 = stack.pop();
+//			DependencyNode s2 = null ;
+//			if (!stack.peek().isRoot()) {
+//				s2 = stack.peek();
+//				input.push(stack.pop());        
+//				t = new Token(s1, s2.getIndex());
+//			}else {
+//				t = new Token(s1, 0);
+//			}
+//		}else {
+//			stack.push(input.pop()); 
+//
+//		}
+//		if(t != null && t.node.getIndex() >0)
+//			tokenList.add(t);
+//		return tokenList;
+//	}
+//
+//	public List<SymbolTable> returnSymbolTableList(DependencyGraph inputGraph ){
+//		List<SymbolTable> symList = new LinkedList<>();
+//		try {
+//			symList.add(inputGraph.getSymbolTables().getSymbolTable("ID"));
+//			symList.add(inputGraph.getSymbolTables().getSymbolTable("FORM"));
+//			symList.add(inputGraph.getSymbolTables().getSymbolTable("LEMMA"));
+//			symList.add(inputGraph.getSymbolTables().getSymbolTable("CPOSTAG"));
+//			symList.add(inputGraph.getSymbolTables().getSymbolTable("POSTAG"));
+//			symList.add(inputGraph.getSymbolTables().getSymbolTable("FEATS"));
+//			//    	symList.add(inputGraph.getSymbolTables().getSymbolTable("HEAD"));
+//		}catch(MaltChainedException me) {
+//			me.printStackTrace();
+//		}
+//		return symList;
+//	}
+//
+//	public String createCoNllConfiguration(Token t,DependencyGraph inputGraph ) throws MaltChainedException {
+//		StringBuffer sb = new StringBuffer();
+//		List<SymbolTable> symList = returnSymbolTableList(inputGraph);
+//		int i = 0;
+//		try {
+//			for(SymbolTable st: symList) {
+//				sb.append(t.node.getLabelSymbol(symList.get(i)));
+//				sb.append("\t");
+//				i++;
+//			}
+//			sb.append(String.valueOf(t.head) + "\t" + "_" + "\t" + "_" + "\t" + "_");
+//		}catch(MaltChainedException me) {
+//			me.printStackTrace();
+//		}
+//		return sb.toString();
+//	}
 
 	public void TrainConfiguration(NivreConfig config,DependencyGraph inputGraph,ArcStandardOracle asc,ArcStandard as) throws MaltChainedException{
 

@@ -17,7 +17,6 @@ public class PredictAction  extends ArcStandard{
 
 	public PredictAction(PropagationManager propagationManager) throws MaltChainedException {
 		super(propagationManager);
-		// TODO Auto-generated constructor stub
 	}
 
 	public GuideUserAction setAction(DependencyStructure inputGraph, GuideUserHistory history, ParserConfiguration config, int transition) throws MaltChainedException {
@@ -33,7 +32,7 @@ public class PredictAction  extends ArcStandard{
 			return this.updateActionContainers(history, transition, inputGraph.getTokenNode(inputPeekIndex).getHeadEdge().getLabelSet());
 		}
 	}
-	
+
 	public void applyTransition(int transition, ParserConfiguration config) throws MaltChainedException {
 		NivreConfig nivreConfig = (NivreConfig)config;
 		Stack<DependencyNode> stack = nivreConfig.getStack();
@@ -41,17 +40,13 @@ public class PredictAction  extends ArcStandard{
 		Edge e = null;
 		switch (transition) {
 		case LEFTARC:
-			System.out.println("left head before:"+ stack.peek().getHead().getIndex());
 			e = nivreConfig.getDependencyStructure().addDependencyEdge(input.peek().getIndex(), stack.peek().getIndex());
 			addEdgeLabels(e);
-			System.out.println("left head after:"+ stack.peek().getHead().getIndex());
 			stack.pop();
 			break;
 		case RIGHTARC:
-			System.out.println("right head before:"+ input.peek().getHead().getIndex());
 			e = nivreConfig.getDependencyStructure().addDependencyEdge(stack.peek().getIndex(), input.peek().getIndex());
 			addEdgeLabels(e);
-			System.out.println("right head after:"+ input.peek().getHead().getIndex());
 			input.pop();
 			if (!stack.peek().isRoot()) {
 				input.push(stack.pop());	
