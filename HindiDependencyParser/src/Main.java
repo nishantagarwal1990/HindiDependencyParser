@@ -48,10 +48,22 @@ public class Main {
     public static void main(String[] args) {
         String fileformat = "resources/conllx.xml";
         String inTrainDir = "data/Training";
-        String outTrainfilename = "feature_train.txt";
+        String outTrainfilename = "output/Interim_Files/feature_train.txt";
         String inTestDir = "data/Testing";
 
+        boolean labelled = false;
+
         Main m = new Main();
+
+        File directory = new File("output/Interim_Files");
+
+        if(!directory.exists())
+            directory.mkdirs();
+
+        directory = new File("output/Test");
+
+        if(!directory.exists())
+            directory.mkdirs();
 
         try {
 			m.run(fileformat,outTrainfilename,inTrainDir,"train","");
@@ -59,13 +71,13 @@ public class Main {
 			e.printStackTrace();
 		}
 
-        String binaryOutTrainFile = "train.txt";
+        String binaryOutTrainFile = "output/Interim_Files/train.txt";
         
         File trainfile = new File(binaryOutTrainFile);
-        m.createFeatures.run(outTrainfilename,binaryOutTrainFile);
+        m.createFeatures.run(outTrainfilename,binaryOutTrainFile,labelled);
         m.createFeatures.Train(trainfile);
         
-        String outDir = "out";
+        String outDir = "output/Test";
         try {
 			m.run(fileformat,"",inTestDir,"test", outDir);
 		} catch (IOException e) {

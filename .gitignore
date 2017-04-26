@@ -10,11 +10,11 @@ HindiDependencyParser/out/
 .idea/
 .DS_Store
 malt*/
-
+HindiDependencyParser/output/
 HindiDependencyParser/HindiDependencyParser.iml
-
 HindiDependencyParser/model
-
 HindiDependencyParser/feature_train.txt
-
 HindiDependencyParser/train.txt
+.classpath
+.project
+result.txt

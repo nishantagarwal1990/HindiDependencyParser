@@ -45,14 +45,14 @@ public class CreateFeatures {
         testfilecontent = new ArrayList<>();
     }
 
-    public void createFeatureMap(){
+    public void createFeatureMap(boolean labelled){
         int k = 0;
         int j = 1;
         for(ArrayList<String> strlist : trainfilecontent){
             if(strlist.size() != 0) {
                 for(int i = 0;i<strlist.size();i++){
                     String val = strlist.get(i);
-                    if(i == 0){
+                    if(i == 0 && !labelled){
                         int ndx = val.indexOf('+');
                         if(ndx  == -1) {
                             if(!labels_map.containsKey(val)) {
@@ -66,6 +66,12 @@ public class CreateFeatures {
                                 labels_map.put(v, k++);
                                 reverse_map.put(labels_map.get(v),v);
                             }
+                        }
+                    }
+                    else if(i == 0 && labelled){
+                        if(!labels_map.containsKey(val)) {
+                            labels_map.put(val, k++);
+                            reverse_map.put(labels_map.get(val),val);
                         }
                     }
                     else{
@@ -216,7 +222,7 @@ public class CreateFeatures {
         Parameter parameter = new Parameter(solver, C, eps);
         try {
             model = Linear.train(problem, parameter);
-            modelFile = new File("out/model");
+            modelFile = new File("output/Interim_Files/model");
 
             try {
                 model.save(modelFile);
@@ -250,12 +256,12 @@ public class CreateFeatures {
         return reverse_map.get((int)prediction);
     }
 
-    public void run(String trainfile,String trainoutfile) {
+    public void run(String trainfile,String trainoutfile,boolean labelled) {
         String trainfilename = trainfile;
         String trainoutfilename = trainoutfile;
         readFileContent(trainfilename);
         //m.testfilecontent = m.readFileContent(testfilename);
-        createFeatureMap();
+        createFeatureMap(labelled);
 
         writeFeatures(trainoutfilename,"train");
         //m.writeFeatures(testoutfilename,"test");

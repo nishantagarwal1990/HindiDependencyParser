@@ -225,7 +225,6 @@ public class OracleTransition {
 		if(step == "train")
 			TrainConfiguration(config,inputGraph,asc,as);
 		else{
-			System.out.println("here");
 			PredictAction pa = new PredictAction(pm);
 			pa.initTableHandlers(_decisionSettings, symbolTables);
 			pa.initTransitionSystem(history);
@@ -242,16 +241,15 @@ public class OracleTransition {
 			features = createFeatures(inputGraph, null, config.getStack(), config.getInput(),"test");
 
 			label = this.createFeatures.predict(features);
-	
-			if(label.equalsIgnoreCase("SH")) {
+
+			if(label.contains("SH")) {
 				labelT = 1;
-			}else if(label.equalsIgnoreCase("RA")) {
+			}else if(label.contains("RA")) {
 				labelT = 2;
 			}else {
 				labelT = 3;
 			}
 			GuideUserAction action = pa.setAction(inputGraph, history, config, labelT);
-//			System.out.println("aciton :"+action.numberOfActions());
 			pa.apply(action, config);
 		}
 	}
