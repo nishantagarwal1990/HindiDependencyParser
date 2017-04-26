@@ -92,7 +92,7 @@ public class OracleTransition {
 	 * @throws MaltChainedException
 	 * @throws IOException 
 	 */
-	public void run(String inFile, String charSet,String step, String outFile) throws MaltChainedException, IOException {
+	public void run(String inFile, String charSet,String step, String outFile,boolean labelled) throws MaltChainedException, IOException {
 
 		// Opens the input and output file with a character encoding set
 		tabReader.open(inFile, charSet);
@@ -106,10 +106,10 @@ public class OracleTransition {
 			moreInput = tabReader.readSentence(inputGraph);
 			if (inputGraph.hasTokens()) {
 				if(step.equalsIgnoreCase("test")) {
-					createConfiguration(inputGraph,step);
+					createConfiguration(inputGraph,step,labelled);
 					tabWriter.writeSentence(inputGraph);
 				}else {
-					createConfiguration(inputGraph,step);
+					createConfiguration(inputGraph,step,labelled);
 				}
 			}
 		}
@@ -196,7 +196,7 @@ public class OracleTransition {
 	 * @throws MaltChainedException
 	 * @throws IOException 
 	 */
-	public void createConfiguration(DependencyGraph inputGraph,String step) throws MaltChainedException, IOException {
+	public void createConfiguration(DependencyGraph inputGraph,String step,boolean labelled) throws MaltChainedException, IOException {
 		//Create configuration
 		NivreConfig config = new NivreConfig(false, false, false);
 
@@ -228,19 +228,19 @@ public class OracleTransition {
 			PredictAction pa = new PredictAction(pm);
 			pa.initTableHandlers(_decisionSettings, symbolTables);
 			pa.initTransitionSystem(history);
-			TestConfiguration(config,inputGraph,asc, history, pa);
+			TestConfiguration(config,inputGraph, history, pa,labelled);
 
 		}
 	}
 
-	public void TestConfiguration(NivreConfig config,DependencyGraph inputGraph,ArcStandardOracle asc, History history, PredictAction pa) throws MaltChainedException, IOException{
+	public void TestConfiguration(NivreConfig config,DependencyGraph inputGraph, History history, PredictAction pa,boolean labelled) throws MaltChainedException, IOException{
 		
 		String features, label;
 		int labelT;
 		while(config.getInput().size() > 0) {
 			features = createFeatures(inputGraph, null, config.getStack(), config.getInput(),"test");
 
-			label = this.createFeatures.predict(features);
+			label = this.createFeatures.predict(features,labelled);
 
 			if(label.contains("SH")) {
 				labelT = 1;

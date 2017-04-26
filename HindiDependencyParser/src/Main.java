@@ -13,7 +13,7 @@ public class Main {
         createFeatures = new CreateFeatures();
     }
 
-    public void run(String fileformat,String outfilename,String inDir,String step, String outDir) throws IOException{
+    public void run(String fileformat,String outfilename,String inDir,String step, String outDir,boolean labelled) throws IOException{
 
         File f = new File(inDir);
         File[] listofFiles = f.listFiles();
@@ -36,7 +36,7 @@ public class Main {
                 inFile = listofFiles[i].getName();
                 try {
 //                	System.out.println(inDir+"/"+inFile);
-                    oracle.run(inDir+"/"+inFile, charSet, step, outDir+"/"+inFile);
+                    oracle.run(inDir+"/"+inFile, charSet, step, outDir+"/"+inFile,labelled);
                 } catch (MaltChainedException e) {
                     System.err.println("MaltParser exception : " + e.getMessage());
                 }
@@ -51,7 +51,7 @@ public class Main {
         String outTrainfilename = "output/Interim_Files/feature_train.txt";
         String inTestDir = "data/Testing";
 
-        boolean labelled = false;
+        boolean labelled = true;
 
         Main m = new Main();
 
@@ -66,7 +66,7 @@ public class Main {
             directory.mkdirs();
 
         try {
-			m.run(fileformat,outTrainfilename,inTrainDir,"train","");
+			m.run(fileformat,outTrainfilename,inTrainDir,"train","",labelled);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -79,7 +79,7 @@ public class Main {
         
         String outDir = "output/Test";
         try {
-			m.run(fileformat,"",inTestDir,"test", outDir);
+			m.run(fileformat,"",inTestDir,"test", outDir,labelled);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

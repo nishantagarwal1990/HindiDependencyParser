@@ -94,17 +94,22 @@ public class CreateFeatures {
         //System.out.println(reverse_map);
     }
 
-    public String createFeatures(ArrayList<String> temp, String step){
+    public String createFeatures(ArrayList<String> temp, String step,boolean labelled){
         HashSet<Integer> s = new HashSet<>();
         StringBuffer sb = new StringBuffer();
         for (int j = 0; j < temp.size(); j++) {
             if (j == 0 && step == "train") {
                 String val = temp.get(j);
-                if(val.indexOf('+') == -1)
-                    sb.append(Integer.toString(labels_map.get(val)) + " ");
+                if (!labelled){
+                    if (val.indexOf('+') == -1)
+                        sb.append(Integer.toString(labels_map.get(val)) + " ");
+                    else {
+                        String v = val.substring(0, val.indexOf('+'));
+                        sb.append(Integer.toString(labels_map.get(v)) + " ");
+                    }
+                }
                 else{
-                    String v = val.substring(0,val.indexOf('+'));
-                    sb.append(Integer.toString(labels_map.get(v)) + " ");
+                    sb.append(Integer.toString(labels_map.get(val)) + " ");
                 }
             }
             else{
@@ -134,7 +139,7 @@ public class CreateFeatures {
         sb.append("\n");
         return sb.toString();
     }
-    public void writeFeatures(String outfilename,String type){
+    public void writeFeatures(String outfilename,String type,boolean labelled){
         ArrayList<ArrayList<String>> filecontent = null;
 
         if(type == "train")
@@ -153,7 +158,7 @@ public class CreateFeatures {
             for(int i = 0;i<filecontent.size();i++) {
                 ArrayList<String> temp = filecontent.get(i);
                 if (temp.size() != 0) {
-                    bufferedWriter.write(createFeatures(temp,type));
+                    bufferedWriter.write(createFeatures(temp,type,labelled));
                 }
             }
 
@@ -235,9 +240,9 @@ public class CreateFeatures {
 
     }
 
-    public String predict(String line){
+    public String predict(String line,boolean labelled){
 
-        String features = createFeatures(new ArrayList<String>(Arrays.asList(line.trim().split(" "))),"test");
+        String features = createFeatures(new ArrayList<String>(Arrays.asList(line.trim().split(" "))),"test",labelled);
 
         ArrayList<String> feats= new ArrayList<String>(Arrays.asList(features.trim().split(" ")));
 
@@ -263,7 +268,7 @@ public class CreateFeatures {
         //m.testfilecontent = m.readFileContent(testfilename);
         createFeatureMap(labelled);
 
-        writeFeatures(trainoutfilename,"train");
+        writeFeatures(trainoutfilename,"train",labelled);
         //m.writeFeatures(testoutfilename,"test");
     }
 
