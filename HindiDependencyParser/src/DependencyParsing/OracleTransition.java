@@ -237,10 +237,18 @@ public class OracleTransition {
 		
 		String features, label;
 		int labelT;
+
 		while(config.getInput().size() > 0) {
 			features = createFeatures(inputGraph, null, config.getStack(), config.getInput(),"test");
 
 			label = this.createFeatures.predict(features,labelled);
+
+			String actionLabel = label;
+			String deprel = "";
+			if(label.contains("+")){
+				actionLabel = label.substring(0,label.indexOf("+"));
+				deprel = label.substring(label.indexOf("+")+1,label.length());
+			}
 
 			if(label.contains("SH")) {
 				labelT = 1;
@@ -249,7 +257,7 @@ public class OracleTransition {
 			}else {
 				labelT = 3;
 			}
-			GuideUserAction action = pa.setAction(inputGraph, history, config, labelT);
+			GuideUserAction action = pa.setAction(inputGraph, history, config, labelT,deprel);
 			pa.apply(action, config);
 		}
 	}

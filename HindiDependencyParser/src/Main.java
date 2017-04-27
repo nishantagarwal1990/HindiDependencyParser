@@ -13,7 +13,8 @@ public class Main {
         createFeatures = new CreateFeatures();
     }
 
-    public void run(String fileformat,String outfilename,String inDir,String step, String outDir,boolean labelled) throws IOException{
+    public void run(String fileformat,String outfilename,String inDir,String step, String outDir,boolean labelled,
+                    OracleTransition oracle) throws IOException{
 
         File f = new File(inDir);
         File[] listofFiles = f.listFiles();
@@ -21,15 +22,6 @@ public class Main {
         String inFile = null;
         String charSet = "UTF-8";
 
-        OracleTransition oracle = null;
-        try {
-        	if(step.equalsIgnoreCase("train"))
-        		oracle = new OracleTransition(fileformat,outfilename,createFeatures);
-        	else
-        		oracle = new OracleTransition(fileformat,"",createFeatures);
-        } catch (MaltChainedException e) {
-            System.err.println("MaltParser exception : " + e.getMessage());
-        }
 
         for (int i = 0; i < listofFiles.length; i++) {
             if (listofFiles[i].isFile() && !listofFiles[i].getName().startsWith(".")) {
@@ -65,21 +57,29 @@ public class Main {
         if(!directory.exists())
             directory.mkdirs();
 
+        OracleTransition oracle = null;
         try {
-			m.run(fileformat,outTrainfilename,inTrainDir,"train","",labelled);
+            oracle = new OracleTransition(fileformat,outTrainfilename,m.createFeatures);
+
+        } catch (MaltChainedException e) {
+            System.err.println("MaltParser exception : " + e.getMessage());
+        }
+
+        try {
+			m.run(fileformat,outTrainfilename,inTrainDir,"train","",labelled,oracle);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
         String binaryOutTrainFile = "output/Interim_Files/train.txt";
-        
+
         File trainfile = new File(binaryOutTrainFile);
         m.createFeatures.run(outTrainfilename,binaryOutTrainFile,labelled);
         m.createFeatures.Train(trainfile);
         
         String outDir = "output/Test";
         try {
-			m.run(fileformat,"",inTestDir,"test", outDir,labelled);
+			m.run(fileformat,"",inTestDir,"test", outDir,labelled,oracle);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
