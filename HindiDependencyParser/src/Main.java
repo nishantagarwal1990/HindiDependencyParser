@@ -26,12 +26,12 @@ public class Main {
         for (int i = 0; i < listofFiles.length; i++) {
             if (listofFiles[i].isFile() && !listofFiles[i].getName().startsWith(".")) {
                 inFile = listofFiles[i].getName();
-                try {
+//                try {
 //                	System.out.println(inDir+"/"+inFile);
                     oracle.run(inDir+"/"+inFile, charSet, step, outDir+"/"+inFile,labelled);
-                } catch (MaltChainedException e) {
-                    System.err.println("MaltParser exception : " + e.getMessage());
-                }
+//                } catch (MaltChainedException e) {
+//                    System.err.println("MaltParser exception : " + e.getMessage());
+//                }
             }
         }
         oracle.closehandles();
@@ -39,6 +39,7 @@ public class Main {
 
     public static void main(String[] args) {
         String fileformat = "resources/conllx.xml";
+//        String inTrainDir = "data/Train_dev";
         String inTrainDir = "data/Training";
         String outTrainfilename = "output/Interim_Files/feature_train.txt";
         String inTestDir = "data/Testing";

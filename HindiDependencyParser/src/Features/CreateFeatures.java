@@ -221,6 +221,19 @@ public class CreateFeatures {
         }
 
         SolverType solver = SolverType.L2R_LR; // -s 0
+//        SolverType solver = SolverType.L2R_L2LOSS_SVC_DUAL; // -s 1
+//        SolverType solver = SolverType.L2R_L2LOSS_SVC; //-s 2
+//        SolverType solver = SolverType.L2R_L1LOSS_S VC_DUAL; //-s 3
+//        SolverType solver = SolverType.MCSVM_CS; //-s 4 // OutOfMemoryError: Java heap space
+//        SolverType solver = SolverType.L1R_L2LOSS_SVC; // -s 5
+//        SolverType solver = SolverType.L1R_LR; // -s 6
+//        SolverType solver = SolverType.L2R_LR_DUAL; //-s 7
+       
+//        For below models are for Regression
+//        SolverType solver = SolverType.L2R_L2LOSS_SVR; // -s 11
+//        SolverType solver = SolverType.L2R_L2LOSS_SVR_DUAL; // -s 12
+//        SolverType solver = SolverType.L2R_L1LOSS_SVR_DUAL; //-s 13
+        
         double C = 1.0;    // cost of constraints violation
         double eps = 0.01; // stopping criteria
 
@@ -231,6 +244,7 @@ public class CreateFeatures {
 
             try {
                 model.save(modelFile);
+//            	model = Model.load(modelFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }

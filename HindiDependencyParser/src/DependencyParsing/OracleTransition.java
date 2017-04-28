@@ -1,11 +1,5 @@
 package DependencyParsing;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 import java.util.Stack;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
@@ -32,12 +26,7 @@ import org.maltparser.parser.algorithm.nivre.ArcStandard;
 import org.maltparser.parser.algorithm.nivre.ArcStandardOracle;
 import org.maltparser.parser.algorithm.nivre.NivreConfig;
 import org.maltparser.parser.history.History;
-import org.maltparser.parser.history.action.ComplexDecisionAction;
 import org.maltparser.parser.history.action.GuideUserAction;
-import org.maltparser.parser.history.container.ActionContainer;
-
-import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
-
 
 public class OracleTransition {
 	private DependencyGraph inputGraph;
@@ -92,29 +81,65 @@ public class OracleTransition {
 	 * @throws MaltChainedException
 	 * @throws IOException 
 	 */
-	public void run(String inFile, String charSet,String step, String outFile,boolean labelled) throws MaltChainedException, IOException {
+	public void run(String inFile, String charSet,String step, String outFile,boolean labelled) throws IOException {
 
 		// Opens the input and output file with a character encoding set
-		tabReader.open(inFile, charSet);
+		try {
+			tabReader.open(inFile, charSet);
+		} catch (MaltChainedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		boolean moreInput = true;
-		
+
 		if(step.equalsIgnoreCase("test")) {
-			tabWriter.open(outFile, charSet);
+			try {
+				tabWriter.open(outFile, charSet);
+			} catch (MaltChainedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		// Reads Sentences until moreInput is false
 		while (moreInput) {
-			moreInput = tabReader.readSentence(inputGraph);
+			try {
+				moreInput = tabReader.readSentence(inputGraph);
+			} catch (MaltChainedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			if (inputGraph.hasTokens()) {
 				if(step.equalsIgnoreCase("test")) {
-					createConfiguration(inputGraph,step,labelled);
-					tabWriter.writeSentence(inputGraph);
+					try {
+						createConfiguration(inputGraph,step,labelled);
+					}catch(MaltChainedException mce) {
+						//tabWriter.writeSentence(inputGraph);
+					}
+					try {
+						tabWriter.writeSentence(inputGraph);
+					} catch (MaltChainedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}else {
-					createConfiguration(inputGraph,step,labelled);
+					try {
+						createConfiguration(inputGraph,step,labelled);
+					} catch (MaltChainedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 		}
-		tabWriter.close();
-		tabReader.close();
+		
+		try {
+			tabReader.close();
+			tabWriter.close();
+		} catch (MaltChainedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	/**
@@ -234,10 +259,9 @@ public class OracleTransition {
 	}
 
 	public void TestConfiguration(NivreConfig config,DependencyGraph inputGraph, History history, PredictAction pa,boolean labelled) throws MaltChainedException, IOException{
-		
+
 		String features, label;
 		int labelT;
-
 		while(config.getInput().size() > 0) {
 			features = createFeatures(inputGraph, null, config.getStack(), config.getInput(),"test");
 
@@ -257,109 +281,112 @@ public class OracleTransition {
 			}else {
 				labelT = 3;
 			}
+
 			GuideUserAction action = pa.setAction(inputGraph, history, config, labelT,deprel);
 			pa.apply(action, config);
+
 		}
+
 	}
 
-//	public GuideUserAction createGuidedAction(DependencyGraph inputGraph, ArcStandardOracle asc, ArcStandard as, History history, NivreConfig config, String label) throws MaltChainedException {
-//		GuideUserAction action = history.getEmptyGuideUserAction();
-//
-//		ActionContainer[] actionContainers;
-//		actionContainers = history.getActionContainerArray();
-//		System.out.println("container length:"+ actionContainers.length);
-//
-//		ActionContainer actionContainer = null;
-//
-//		if(label.equalsIgnoreCase("SH")) {
-//			actionContainer = actionContainers[0];
-//
-//			actionContainer.setAction(1);
-//			actionContainers[0] = actionContainer;
-//			action.addAction(actionContainers);
-//		}else if(label.equalsIgnoreCase("LA")) {
-//			actionContainer = actionContainers[1];
-//			actionContainer.setAction(2);
-//			actionContainers[1] = actionContainer;
-//			action.addAction(actionContainers);	
-//		}else if(label.equalsIgnoreCase("RA")) {
-//			actionContainer = actionContainers[2];
-//			actionContainer.setAction(3);
-//			actionContainers[2] = actionContainer;
-//			action.addAction(actionContainers);
-//		}
-//		return action;
-//	}
-//	
-//	public List<Token> apply(NivreConfig config, String action, List<Token> tokenList, ArcStandardOracle asc) {
-//		Token t = null;
-//		Stack<DependencyNode> stack = config.getStack();
-//		Stack<DependencyNode> input = config.getInput();
-//			if(action.equalsIgnoreCase("LA")) {
-//			DependencyNode s1 = null;
-//			if(input.size()>0)
-//				s1 = input.peek();
-//			else
-//				s1 = stack.pop();
-//			DependencyNode s2 = stack.pop();
-//			t = new Token(s2, s1.getIndex());
-//			if(input.size() == 0)
-//				stack.push(s1);
-//		}else if(action.equalsIgnoreCase("RA")) {
-//			DependencyNode s1 = null;
-//			if(input.size()>0)
-//				s1 = input.pop();
-//			else
-//				s1 = stack.pop();
-//			DependencyNode s2 = null ;
-//			if (!stack.peek().isRoot()) {
-//				s2 = stack.peek();
-//				input.push(stack.pop());        
-//				t = new Token(s1, s2.getIndex());
-//			}else {
-//				t = new Token(s1, 0);
-//			}
-//		}else {
-//			stack.push(input.pop()); 
-//
-//		}
-//		if(t != null && t.node.getIndex() >0)
-//			tokenList.add(t);
-//		return tokenList;
-//	}
-//
-//	public List<SymbolTable> returnSymbolTableList(DependencyGraph inputGraph ){
-//		List<SymbolTable> symList = new LinkedList<>();
-//		try {
-//			symList.add(inputGraph.getSymbolTables().getSymbolTable("ID"));
-//			symList.add(inputGraph.getSymbolTables().getSymbolTable("FORM"));
-//			symList.add(inputGraph.getSymbolTables().getSymbolTable("LEMMA"));
-//			symList.add(inputGraph.getSymbolTables().getSymbolTable("CPOSTAG"));
-//			symList.add(inputGraph.getSymbolTables().getSymbolTable("POSTAG"));
-//			symList.add(inputGraph.getSymbolTables().getSymbolTable("FEATS"));
-//			//    	symList.add(inputGraph.getSymbolTables().getSymbolTable("HEAD"));
-//		}catch(MaltChainedException me) {
-//			me.printStackTrace();
-//		}
-//		return symList;
-//	}
-//
-//	public String createCoNllConfiguration(Token t,DependencyGraph inputGraph ) throws MaltChainedException {
-//		StringBuffer sb = new StringBuffer();
-//		List<SymbolTable> symList = returnSymbolTableList(inputGraph);
-//		int i = 0;
-//		try {
-//			for(SymbolTable st: symList) {
-//				sb.append(t.node.getLabelSymbol(symList.get(i)));
-//				sb.append("\t");
-//				i++;
-//			}
-//			sb.append(String.valueOf(t.head) + "\t" + "_" + "\t" + "_" + "\t" + "_");
-//		}catch(MaltChainedException me) {
-//			me.printStackTrace();
-//		}
-//		return sb.toString();
-//	}
+	//	public GuideUserAction createGuidedAction(DependencyGraph inputGraph, ArcStandardOracle asc, ArcStandard as, History history, NivreConfig config, String label) throws MaltChainedException {
+	//		GuideUserAction action = history.getEmptyGuideUserAction();
+	//
+	//		ActionContainer[] actionContainers;
+	//		actionContainers = history.getActionContainerArray();
+	//		System.out.println("container length:"+ actionContainers.length);
+	//
+	//		ActionContainer actionContainer = null;
+	//
+	//		if(label.equalsIgnoreCase("SH")) {
+	//			actionContainer = actionContainers[0];
+	//
+	//			actionContainer.setAction(1);
+	//			actionContainers[0] = actionContainer;
+	//			action.addAction(actionContainers);
+	//		}else if(label.equalsIgnoreCase("LA")) {
+	//			actionContainer = actionContainers[1];
+	//			actionContainer.setAction(2);
+	//			actionContainers[1] = actionContainer;
+	//			action.addAction(actionContainers);	
+	//		}else if(label.equalsIgnoreCase("RA")) {
+	//			actionContainer = actionContainers[2];
+	//			actionContainer.setAction(3);
+	//			actionContainers[2] = actionContainer;
+	//			action.addAction(actionContainers);
+	//		}
+	//		return action;
+	//	}
+	//	
+	//	public List<Token> apply(NivreConfig config, String action, List<Token> tokenList, ArcStandardOracle asc) {
+	//		Token t = null;
+	//		Stack<DependencyNode> stack = config.getStack();
+	//		Stack<DependencyNode> input = config.getInput();
+	//			if(action.equalsIgnoreCase("LA")) {
+	//			DependencyNode s1 = null;
+	//			if(input.size()>0)
+	//				s1 = input.peek();
+	//			else
+	//				s1 = stack.pop();
+	//			DependencyNode s2 = stack.pop();
+	//			t = new Token(s2, s1.getIndex());
+	//			if(input.size() == 0)
+	//				stack.push(s1);
+	//		}else if(action.equalsIgnoreCase("RA")) {
+	//			DependencyNode s1 = null;
+	//			if(input.size()>0)
+	//				s1 = input.pop();
+	//			else
+	//				s1 = stack.pop();
+	//			DependencyNode s2 = null ;
+	//			if (!stack.peek().isRoot()) {
+	//				s2 = stack.peek();
+	//				input.push(stack.pop());        
+	//				t = new Token(s1, s2.getIndex());
+	//			}else {
+	//				t = new Token(s1, 0);
+	//			}
+	//		}else {
+	//			stack.push(input.pop()); 
+	//
+	//		}
+	//		if(t != null && t.node.getIndex() >0)
+	//			tokenList.add(t);
+	//		return tokenList;
+	//	}
+	//
+	//	public List<SymbolTable> returnSymbolTableList(DependencyGraph inputGraph ){
+	//		List<SymbolTable> symList = new LinkedList<>();
+	//		try {
+	//			symList.add(inputGraph.getSymbolTables().getSymbolTable("ID"));
+	//			symList.add(inputGraph.getSymbolTables().getSymbolTable("FORM"));
+	//			symList.add(inputGraph.getSymbolTables().getSymbolTable("LEMMA"));
+	//			symList.add(inputGraph.getSymbolTables().getSymbolTable("CPOSTAG"));
+	//			symList.add(inputGraph.getSymbolTables().getSymbolTable("POSTAG"));
+	//			symList.add(inputGraph.getSymbolTables().getSymbolTable("FEATS"));
+	//			//    	symList.add(inputGraph.getSymbolTables().getSymbolTable("HEAD"));
+	//		}catch(MaltChainedException me) {
+	//			me.printStackTrace();
+	//		}
+	//		return symList;
+	//	}
+	//
+	//	public String createCoNllConfiguration(Token t,DependencyGraph inputGraph ) throws MaltChainedException {
+	//		StringBuffer sb = new StringBuffer();
+	//		List<SymbolTable> symList = returnSymbolTableList(inputGraph);
+	//		int i = 0;
+	//		try {
+	//			for(SymbolTable st: symList) {
+	//				sb.append(t.node.getLabelSymbol(symList.get(i)));
+	//				sb.append("\t");
+	//				i++;
+	//			}
+	//			sb.append(String.valueOf(t.head) + "\t" + "_" + "\t" + "_" + "\t" + "_");
+	//		}catch(MaltChainedException me) {
+	//			me.printStackTrace();
+	//		}
+	//		return sb.toString();
+	//	}
 
 	public void TrainConfiguration(NivreConfig config,DependencyGraph inputGraph,ArcStandardOracle asc,ArcStandard as) throws MaltChainedException{
 

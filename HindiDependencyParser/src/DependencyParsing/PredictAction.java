@@ -24,8 +24,8 @@ public class PredictAction  extends ArcStandard{
 									 ParserConfiguration config, int transition,String deprel) throws MaltChainedException {
 		NivreConfig nivreConfig = (NivreConfig)config;
 		DependencyNode stackPeek = nivreConfig.getStack().peek();
-		int stackPeekIndex = stackPeek.getIndex();
-		int inputPeekIndex = nivreConfig.getInput().peek().getIndex();
+//		int stackPeekIndex = stackPeek.getIndex();
+//		int inputPeekIndex = nivreConfig.getInput().peek().getIndex();
 		if(transition == 1) {
 			return this.updateActionContainers(history, transition, (LabelSet) null);
 //		} else if(transition == 3) {
