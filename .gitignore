@@ -18,3 +18,4 @@ HindiDependencyParser/train.txt
 .classpath
 .project
 result.txt
+*.docx
